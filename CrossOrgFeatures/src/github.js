@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Card, Accordion, Alert, Badge, Form, Button } from 'react-bootstrap';
-
-let git_api = "https://api.github.com/"
+import { Container, Row, Col, Card, Accordion, Alert, Badge, Form, Button, ListGroup } from 'react-bootstrap';
 
 
-function Home({username, pat}) {
+
+
+const git_api = "https://api.github.com/"
+
+
+function Home({ username, pat }) {
 
     const [repos, setRepos] = useState([]);
     const [milestone, setMilestone] = useState({});
@@ -12,22 +15,22 @@ function Home({username, pat}) {
     const [milestone_method, setMileStoneMethod] = useState("CREATE")
     const [label_method, setLabeleMethod] = useState("CREATE")
     const [color, setColor] = useState("fbca04")
+    const [feature, setFeature] = useState("")
 
 
 
     // Repo Related Functions
 
     let get_repos = (repos) => {
-        console.log(repos)
         let repositories = []
         repos.map(repo => repo['archived'] == false && repo['disabled'] == false && repositories.push(repo['name']))
         return repositories;
 
     }
 
-    useEffect(()  => {
+    useEffect(() => {
 
-        let repo_data = get_api(git_api +"users/"+ "paridhi-gupta1998"+ "/repos", 'GET')
+        let repo_data = get_api(git_api + "users/" + username + "/repos", 'GET')
         repo_data.then(data => {
             let repo_list = get_repos(data)
             setRepos(repo_list)
@@ -37,7 +40,7 @@ function Home({username, pat}) {
 
     }, []);
 
-  
+
 
 
     // MileStone Related Functions
@@ -59,8 +62,7 @@ function Home({username, pat}) {
             if (ml_number) {
                 milestone_url = milestone_url + `/${ml_number}`
                 let temp_milestone = milestone
-                if (milestone['rename'])
-                {
+                if (milestone['rename']) {
                     temp_milestone['title'] = milestone['rename']
                     delete temp_milestone['rename']
                 }
@@ -102,11 +104,10 @@ function Home({username, pat}) {
             let ll_url = get_label_number(list, name)
             if (ll_url) {
                 let temp_label = label
-                if (label['rename'])
-                    {
-                        temp_label['name'] = temp_label['rename']
-                        delete temp_label['rename']
-                    }
+                if (label['rename']) {
+                    temp_label['name'] = temp_label['rename']
+                    delete temp_label['rename']
+                }
                 api(ll_url, 'PATCH', temp_label)
             }
         }
@@ -139,24 +140,22 @@ function Home({username, pat}) {
     // RECURSIVE GET API : Because of Rate limit
     let get_api = (url, method, api_data, limit = 30, page = 1) => {
 
-        
-        url = url.split('?')[0]+ `?page=${page}`
+
+        url = url.split('?')[0] + `?page=${page}`
         let response = api(url, method, api_data, page)
-        response.then(res => 
-                {
-                    if(Object.keys(res).length == limit){
-                        let inner_res = get_api(url, method, api_data, page + 1)
-                        inner_res.then(inner => 
-                            {
-                                return {...res, ...inner}
-                            }
-                            
-                        )
-                    }
-                    else{
-                        return res
-                    }
+        response.then(res => {
+            if (Object.keys(res).length == limit) {
+                let inner_res = get_api(url, method, api_data, page + 1)
+                inner_res.then(inner => {
+                    return { ...res, ...inner }
                 }
+
+                )
+            }
+            else {
+                return res
+            }
+        }
         )
         return response
 
@@ -183,10 +182,11 @@ function Home({username, pat}) {
             },
             body: JSON.stringify(api_data)
         }).then(response => response.json())
-        .then(data => {
-            console.log(data, method) 
-            return data})
-        .catch(error => console.log(error,))
+            .then(data => {
+                console.log(data, method)
+                return data
+            })
+            .catch(error => console.log(error,))
         return response
 
 
@@ -195,12 +195,12 @@ function Home({username, pat}) {
     // main function after submit button is pressed
     const handleSubmitMilestone = (evt) => {
         evt.preventDefault();
-        let milestone_url = "repos/"+username+"/" + 'portal' + "/milestones"
+        let milestone_url = "repos/" + username + "/" + 'portal' + "/milestones"
 
 
         repos.map(repo => {
 
-            let milestone_url = "repos/"+username+"/" + repo + "/milestones"
+            let milestone_url = "repos/" + username + "/" + repo + "/milestones"
             if (milestone_method == "CREATE")
                 create_milestone(milestone_url)
             else if (milestone_method == "UPDATE")
@@ -214,10 +214,10 @@ function Home({username, pat}) {
 
     const handleSubmitLabel = (evt) => {
         evt.preventDefault();
-        let label_url = "repos/"+username+"/" + 'portal' + "/labels"
+        let label_url = "repos/" + username + "/" + 'portal' + "/labels"
         repos.map(repo => {
 
-            let label_url = "repos/"+username+"/" + repo + "/labels"
+            let label_url = "repos/" + username + "/" + repo + "/labels"
             if (label_method == "CREATE")
                 create_label(label_url)
             else if (label_method == "UPDATE")
@@ -257,6 +257,10 @@ function Home({username, pat}) {
         }
     }
 
+    const selectfeature = (e) => {
+        setFeature(e.target.id)
+    }
+
 
     return (
         <>
@@ -266,101 +270,140 @@ function Home({username, pat}) {
             {/* {repos && repos.length == 0 && set_repo()} */}
             <br />
             <br />
+            <Row className="g-12" className="justify-content-md-center">
+                <Col md={4}>
+                    {repos && <h4>TOTAL REPOSITORIES: {repos.length}</h4>}
+                    {repos &&
+                        <Accordion defaultActiveKey={['0']} flush >
+                            <Accordion.Item eventKey="0" >
+                                <Accordion.Header>REPOSITORY NAMES</Accordion.Header>
+                                <Accordion.Body>
+                                    <ListGroup>
+                                        {repos.map(repo => <ListGroup.Item>{repo}</ListGroup.Item>
+                                        )}
+                                    </ListGroup>
+
+                                </Accordion.Body>
+                            </Accordion.Item>
+                        </Accordion>
+                    }
+
+                </Col>
+
+            </Row>
+            <hr/>
+            {repos &&
+                <Row className="g-12" className="d-flex align-items-end justify-content-md-center">
+                    <Col md={1}>
+                        <Form.Group className="mb-5">
+                            <Button id="milestone_feature" bsStyle="link" onClick={selectfeature}>MILESTONES</Button>
+                        </Form.Group>
+                    </Col>
+                    <Col md={1}>
+                        <Form.Group className="mb-5">
+                            <Button id="label_feature" bsStyle="link" onClick={selectfeature}>LABELS</Button>
+                        </Form.Group>
+                    </Col>
+                </Row>
+            }
+
 
             <Row className="g-12" className="justify-content-md-center">
 
+                {feature && feature === "milestone_feature" ?
 
-                <Col md={4}>
-                    <Container>
-                        <h1> Milestones </h1>
-                        <Form onSubmit={handleSubmitMilestone} style={{ display: 'block' }}>
-                            <fieldset>
-                                <Form.Group className="mb-5">
-                                    <Form.Label htmlFor="disabledTextInput">Name</Form.Label>
-                                    <Form.Control id="milestone-name" onChange={e => handleMilestoneInputs('title', e.target.value)} required />
-                                </Form.Group>
-                                <Form.Group className="mb-5">
-                                    <Form.Label htmlFor="disabledTextInput">Description</Form.Label>
-                                    <Form.Control as="textarea" id="milestone-description" rows={3} onChange={e => handleMilestoneInputs('description', e.target.value)} />
-                                </Form.Group>
-                                <Form.Group className="mb-5">
-                                    <Form.Label htmlFor="disabledTextInput">Due Date</Form.Label>
-                                    <Form.Control type="date" name='date_of_birth' onChange={e => handleMilestoneInputs('due_on', e.target.value)} />
-                                    {/* <Form.Control id="milestone-due" onChange={e => setMilestone({ ...milestone, "due_date": e.target.value })} /> */}
-                                </Form.Group>
-                                <Form.Group className="mb-5">
-                                    <Form.Label htmlFor="disabledSelect">Operation: </Form.Label>
-                                    <Form.Select id="milestoneMethod" onChange={e => setMileStoneMethod(e.target.value)} >
-                                        <option>CREATE</option>
-                                        <option>UPDATE</option>
-                                        <option>DELETE</option>
-                                    </Form.Select>
-                                </Form.Group>
-                                <Form.Group className="mb-5">
-                                    <Form.Label htmlFor="disabledTextInput">Rename</Form.Label>
-                                    <Form.Control id="milestone-rename" onChange={e => handleMilestoneInputs('rename', e.target.value)} />
-                                    <Form.Text className="text-muted">
-                                        Fill this when you want to update the name
-                                    </Form.Text>
-                                </Form.Group>
-                                <Button style={{ backgroundColor: "#e87722" }} type="submit">Submit</Button>
-                            </fieldset>
-                        </Form>
-                    </Container>
-                </Col>
+                    <Col md={4}>
+                        <Container>
+                            <h1> Milestones </h1>
+                            <Form onSubmit={handleSubmitMilestone} >
+                                <fieldset>
+                                    <Form.Group className="mb-5">
+                                        <Form.Label htmlFor="disabledTextInput">Name</Form.Label>
+                                        <Form.Control id="milestone-name" onChange={e => handleMilestoneInputs('title', e.target.value)} required />
+                                    </Form.Group>
+                                    <Form.Group className="mb-5">
+                                        <Form.Label htmlFor="disabledTextInput">Description</Form.Label>
+                                        <Form.Control as="textarea" id="milestone-description" rows={3} onChange={e => handleMilestoneInputs('description', e.target.value)} />
+                                    </Form.Group>
+                                    <Form.Group className="mb-5">
+                                        <Form.Label htmlFor="disabledTextInput">Due Date</Form.Label>
+                                        <Form.Control type="date" name='date_of_birth' onChange={e => handleMilestoneInputs('due_on', e.target.value)} />
+                                        {/* <Form.Control id="milestone-due" onChange={e => setMilestone({ ...milestone, "due_date": e.target.value })} /> */}
+                                    </Form.Group>
+                                    <Form.Group className="mb-5">
+                                        <Form.Label htmlFor="disabledSelect">Operation: </Form.Label>
+                                        <Form.Select id="milestoneMethod" onChange={e => setMileStoneMethod(e.target.value)} >
+                                            <option>CREATE</option>
+                                            <option>UPDATE</option>
+                                            <option>DELETE</option>
+                                        </Form.Select>
+                                    </Form.Group>
+                                    <Form.Group className="mb-5">
+                                        <Form.Label htmlFor="disabledTextInput">Rename</Form.Label>
+                                        <Form.Control id="milestone-rename" onChange={e => handleMilestoneInputs('rename', e.target.value)} />
+                                        <Form.Text className="text-muted">
+                                            Fill this when you want to update the name
+                                        </Form.Text>
+                                    </Form.Group>
+                                    <Button style={{ backgroundColor: "#e87722" }} type="submit">Submit</Button>
+                                </fieldset>
+                            </Form>
+                        </Container>
+                    </Col> : undefined
+                }
+
+                {feature && feature === "label_feature" ?
+                    <Col md={4}>
+                        <Container>
+                            <h1> Labels</h1>
+
+                            <Form onSubmit={handleSubmitLabel}>
+                                <fieldset>
+                                    <Form.Group className="mb-5">
+                                        <Form.Label htmlFor="disabledTextInput">Name</Form.Label>
+                                        <Form.Control id="label-name" onChange={e => handleLabelInputs('name', e.target.value)} required />
+                                    </Form.Group>
+                                    <Form.Group className="mb-5">
+                                        <Form.Label htmlFor="disabledTextInput">Description</Form.Label>
+                                        <Form.Control as="textarea" id="label-description" rows={3} onChange={e => handleLabelInputs('description', e.target.value)} />
+                                    </Form.Group>
+                                    <Form.Group className="mb-5">
+                                        <Form.Label htmlFor="disabledTextInput">Color</Form.Label>
+                                        <Row>
+                                            <Col md={4}>
+                                                <Form.Control id="color" value={label.color} onChange={e => handleLabelInputs('color', e.target.value)} />
+                                            </Col>
+                                            <Col md={4}>
+                                                <p style={{ backgroundColor: '#' + color }}>{color}</p>
+                                            </Col>
+                                            <Col md={4}>
+                                                <Button onClick={() => color_generator()}>Next color</Button>
+                                            </Col>
+                                        </Row>
 
 
-                <Col md={4}>
-                    <Container>
-                        <h1> Labels</h1>
-
-                        <Form onSubmit={handleSubmitLabel} style={{ display: 'block' }}>
-                            <fieldset>
-                                <Form.Group className="mb-5">
-                                    <Form.Label htmlFor="disabledTextInput">Name</Form.Label>
-                                    <Form.Control id="label-name" onChange={e => handleLabelInputs('name', e.target.value)} required />
-                                </Form.Group>
-                                <Form.Group className="mb-5">
-                                    <Form.Label htmlFor="disabledTextInput">Description</Form.Label>
-                                    <Form.Control as="textarea" id="label-description" rows={3} onChange={e => handleLabelInputs('description', e.target.value)} />
-                                </Form.Group>
-                                <Form.Group className="mb-5">
-                                    <Form.Label htmlFor="disabledTextInput">Color</Form.Label>
-                                    <Row>
-                                        <Col md={4}>
-                                            <Form.Control id="color" value={label.color} onChange={e => handleLabelInputs('color', e.target.value)} />
-                                        </Col>
-                                        <Col md={4}>
-                                            <p style={{ backgroundColor: '#' + color }}>{color}</p>
-                                            {/* <Form.Label style={{ backgroundColor: '#' + color }} htmlFor="disabledTextInput">Color</Form.Label> */}
-                                        </Col>
-                                        <Col md={4}>
-                                            <Button onClick={() => color_generator()}>Next color</Button>
-                                        </Col>
-                                    </Row>
-
-
-                                </Form.Group>
-                                <Form.Group className="mb-5">
-                                    <Form.Label htmlFor="disabledSelect">Operation: </Form.Label>
-                                    <Form.Select id="labelMethod" onChange={e => setLabeleMethod(e.target.value)} >
-                                        <option>CREATE</option>
-                                        <option>UPDATE</option>
-                                        <option>DELETE</option>
-                                    </Form.Select>
-                                </Form.Group>
-                                <Form.Group className="mb-5">
-                                    <Form.Label htmlFor="disabledTextInput">Rename</Form.Label>
-                                    <Form.Control id="label-rename" onChange={e => handleLabelInputs('rename', e.target.value)} />
-                                    <Form.Text className="text-muted">
-                                        Fill this when you want to update the name
-                                    </Form.Text>
-                                </Form.Group>
-                                <Button style={{ backgroundColor: "#e87722" }} type="submit">Submit</Button>
-                            </fieldset>
-                        </Form>
-                    </Container>
-                </Col>
+                                    </Form.Group>
+                                    <Form.Group className="mb-5">
+                                        <Form.Label htmlFor="disabledSelect">Operation: </Form.Label>
+                                        <Form.Select id="labelMethod" onChange={e => setLabeleMethod(e.target.value)} >
+                                            <option>CREATE</option>
+                                            <option>UPDATE</option>
+                                            <option>DELETE</option>
+                                        </Form.Select>
+                                    </Form.Group>
+                                    <Form.Group className="mb-5">
+                                        <Form.Label htmlFor="disabledTextInput">Rename</Form.Label>
+                                        <Form.Control id="label-rename" onChange={e => handleLabelInputs('rename', e.target.value)} />
+                                        <Form.Text className="text-muted">
+                                            Fill this when you want to update the name
+                                        </Form.Text>
+                                    </Form.Group>
+                                    <Button style={{ backgroundColor: "#e87722" }} type="submit">Submit</Button>
+                                </fieldset>
+                            </Form>
+                        </Container>
+                    </Col> : undefined
+                }
 
             </Row>
             <br />
