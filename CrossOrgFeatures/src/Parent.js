@@ -40,16 +40,18 @@ export default function Parent() {
     // For only get repos, because we are using search. It has different syntax
     let get_api = (url, method, api_data, limit = 30, page = 1) => {
 
-        url = url.split('?')[0] + `?page=${page}&q=user:${userdata.username}`
+        url = url.split('?')[0] + `?page=${page}&q=user:${userdata.username}+fork:true`
         let response = api(url, method, api_data, page)
         let final_response = response.then(res => {
-            if (res && Object.keys(res).length == limit) {
+            console.log("HI", res, page)
+            if (res && Object.keys(res.items).length >= limit) {
 
                 let inner_res = get_api(url, method, api_data, limit = 30, page + 1)
+                console.log("HEY")
 
                 let nested_respose = inner_res.then(inner => {
-
-                    return [...res.items, ...inner.items]
+                    console.log("inner" ,inner)
+                    return [...res.items, ...inner]
                 }
 
                 )
