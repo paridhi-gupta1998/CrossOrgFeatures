@@ -237,6 +237,7 @@ export default function Parent() {
                             <Form.Group className="mb-5">
                                 <Form.Label htmlFor="disabledTextInput">Personal Access Token</Form.Label>
                                 <Form.Control type="password" id="pat" onChange={inputsHandler} value={inputField.pat} required />
+                                <Form.Text type="text" target="_blank"><a href= "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token">Click here</a> to know how to create personal access token </Form.Text>
                             </Form.Group>
 
 
