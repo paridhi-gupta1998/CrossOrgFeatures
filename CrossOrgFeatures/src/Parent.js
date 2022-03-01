@@ -4,6 +4,7 @@ import Milestone from './Milestones';
 import Labels from './Labels';
 import { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Accordion, Alert, Badge, Form, Button, Navbar, Nav } from 'react-bootstrap';
+import logo from './logo.png';
 
 const git_api = "https://api.github.com/"
 const load_repo_message = "Load Github Repositories first"
@@ -37,13 +38,13 @@ export default function Parent() {
             if (error instanceof Promise) {
                 error.then(err => {
                     setRepos([])
-                    alert(  err )
+                    alert(err)
                     return
                 })
             }
             else {
                 setRepos([])
-                alert( error )
+                alert(error)
                 return
 
             }
@@ -148,10 +149,10 @@ export default function Parent() {
 
                     let data = error.then(err => {
                         // console.log("API ERROR", err)
-                        let e = "MESSAGE: " + err['message'] 
-                        if(err['errors'])
-                         e += "Error: " + JSON.stringify(err['errors'])
-                        return  e
+                        let e = "MESSAGE: " + err['message']
+                        if (err['errors'])
+                            e += "Error: " + JSON.stringify(err['errors'])
+                        return e
                     })
                     throw (data)
 
@@ -206,9 +207,16 @@ export default function Parent() {
     return (
         <>
             <link href="https://maxcdn.bootstrapcdn.com/bootstrap/latest/css/bootstrap.min.css" rel="stylesheet" />
-            <Navbar variant="light" bg="light" style={{ Color: "#e87722" }}>
+            {console.log(logo)}
+            <Navbar collapseOnSelect expand="lg" variant="light" bg="light" style={{ Color: "#e87722" }}>
                 <Container>
-                    <Navbar.Brand >CrossOrganizationFeatures</Navbar.Brand>
+                    <Navbar.Brand > <img
+                        alt=""
+                        src={logo}
+                        width="30"
+                        height="30"
+                        className="d-inline-block align-top"
+                    />{' '}CReF</Navbar.Brand>
                     <Navbar.Text>
                         Total Repositories: {repos.length}
                     </Navbar.Text>
@@ -237,7 +245,7 @@ export default function Parent() {
                             <Form.Group className="mb-5">
                                 <Form.Label htmlFor="disabledTextInput">Personal Access Token</Form.Label>
                                 <Form.Control type="password" id="pat" onChange={inputsHandler} value={inputField.pat} required />
-                                <Form.Text type="text" target="_blank"><a href= "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token">Click here</a> to know how to create personal access token </Form.Text>
+                                <Form.Text type="text" target="_blank"><a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token">Click here</a> to know how to create personal access token </Form.Text>
                             </Form.Group>
 
 
