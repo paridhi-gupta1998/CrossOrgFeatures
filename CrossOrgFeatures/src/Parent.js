@@ -16,6 +16,7 @@ export default function Parent() {
     })
     const [feature, setFeature] = useState("load_repositores")
     const [repos, setRepos] = useState([]);
+    const [Featurestatuslist, setFeatureStatusList] = useState([])
 
     let get_repos = (repos) => {
         let repositories = []
@@ -31,6 +32,21 @@ export default function Parent() {
             let repo_list = get_repos(data)
             setRepos(repo_list)
 
+        }
+        ).catch(error => {
+            if (error instanceof Promise) {
+                error.then(err => {
+                    setRepos([])
+                    alert(  err )
+                    return
+                })
+            }
+            else {
+                setRepos([])
+                alert( error )
+                return
+
+            }
         }
         )
 
@@ -50,7 +66,7 @@ export default function Parent() {
                 console.log("HEY")
 
                 let nested_respose = inner_res.then(inner => {
-                    console.log("inner" ,inner)
+                    console.log("inner", inner)
                     return [...res.items, ...inner]
                 }
 
@@ -62,7 +78,7 @@ export default function Parent() {
                 return [...res.items]
             }
         }
-        ).catch(error => { throw (error) })
+        )
 
         return final_response
 
@@ -129,10 +145,13 @@ export default function Parent() {
             })
             .catch(error => {
                 if (error instanceof Promise) {
-                    
+
                     let data = error.then(err => {
                         // console.log("API ERROR", err)
-                        return "MESSAGE: " +  err['message'] + "Error: " + JSON.stringify(err['errors'])
+                        let e = "MESSAGE: " + err['message'] 
+                        if(err['errors'])
+                         e += "Error: " + JSON.stringify(err['errors'])
+                        return  e
                     })
                     throw (data)
 
@@ -167,6 +186,11 @@ export default function Parent() {
         }
 
     }, [userdata]);
+
+    useEffect(() => {
+        setFeatureStatusList([])
+
+    }, [feature]);
 
     useEffect(() => {
         if (repos && repos.length > 0) {
@@ -225,8 +249,8 @@ export default function Parent() {
                 </Container> : undefined}
 
             <Repositories userdata={userdata} feature={feature} repos={repos} get_api={get_api} api={api} git_api={git_api} load_repo_message={load_repo_message} />
-            <Milestone userdata={userdata} feature={feature} repos={repos} get_api={get_api} api={api} git_api={git_api} load_repo_message={load_repo_message} />
-            <Labels userdata={userdata} feature={feature} repos={repos} get_api={get_api} api={api} git_api={git_api} load_repo_message={load_repo_message} />
+            <Milestone userdata={userdata} feature={feature} repos={repos} get_api={get_list_api} api={api} git_api={git_api} load_repo_message={load_repo_message} Featurestatuslist={Featurestatuslist} setFeatureStatusList={setFeatureStatusList} />
+            <Labels userdata={userdata} feature={feature} repos={repos} get_api={get_list_api} api={api} git_api={git_api} load_repo_message={load_repo_message} Featurestatuslist={Featurestatuslist} setFeatureStatusList={setFeatureStatusList} />
 
 
 
